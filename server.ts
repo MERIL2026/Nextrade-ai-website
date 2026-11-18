@@ -2,6 +2,7 @@ import 'dotenv/config';
 import crypto from 'node:crypto';
 import express, { NextFunction, Request, Response } from 'express';
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { createMarketService } from './src/market/service';
@@ -54,8 +55,10 @@ const NON_INDEXABLE_ROUTES = new Set([
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const PORT = 3000;
-const isProduction = process.env.NODE_ENV === 'production';
+const PORT = Number(process.env.PORT || 3000);
+const isVercel = Boolean(process.env.VERCEL);
+const isProduction = process.env.NODE_ENV === 'production' || isVercel;
+const writableRoot = isVercel ? path.join(os.tmpdir(), 'nextrade-data') : __dirname;
 const MAX_CONTACT_LOG_BYTES = 10 * 1024 * 1024;
 const researchLimiter = new SlidingWindowRateLimiter(25, 60_000);
 const contactLimiter = new SlidingWindowRateLimiter(5, 15 * 60_000);
@@ -230,7 +233,7 @@ ${urls}
 `;
 }
 
-async function startServer() {
+export async function createApp(): Promise<express.Express> {
   const authDb = await createAuthDatabase();
   const authDatabaseMode = authDb.dialect === 'postgres' ? 'supabase-postgres' : 'sqlite';
   const authEmailSender = createAuthEmailSender();
@@ -279,7 +282,7 @@ async function startServer() {
     telemetryCollector,
     jobManager,
     marketService,
-    projectRoot: __dirname,
+    projectRoot: writableRoot,
   });
   await adminService.superOps.ensureSeeded();
 
@@ -730,7 +733,7 @@ async function startServer() {
     };
 
     try {
-      const dataDir = path.join(__dirname, '.data');
+      const dataDir = path.join(writableRoot, '.data');
       fs.mkdirSync(dataDir, { recursive: true });
       const logPath = path.join(dataDir, 'contact-submissions.jsonl');
       if (fs.existsSync(logPath) && fs.statSync(logPath).size >= MAX_CONTACT_LOG_BYTES) {
@@ -916,9 +919,9 @@ async function startServer() {
         const appHtml = render(req.originalUrl, initialAuth);
 
         const html = template
-          .replace(/<!--ssr-meta-start-->[\s\S]*?<!--ssr-meta-end-->/, ssrMeta)
+          .replace(/<!--ssr-meta-start-->[\s\S]*?<!--ssr-meta-end-->/, () => ssrMeta)
           .replace('<!--ssr-head-->', '')
-          .replace('<!--ssr-outlet-->', appHtml);
+          .replace('<!--ssr-outlet-->', () => appHtml);
 
         const statusCode = adminDeniedStatus ?? (isKnownRoute ? 200 : 404);
         res
@@ -931,8 +934,13 @@ async function startServer() {
       }
     });
   } else {
-    const distDir = path.join(__dirname, 'dist');
-    const templateHtml = fs.readFileSync(path.join(distDir, 'index.html'), 'utf-8');
+    const distDir = fs.existsSync(path.join(__dirname, 'dist'))
+      ? path.join(__dirname, 'dist')
+      : path.join(process.cwd(), 'dist');
+    const templatePath = fs.existsSync(path.join(distDir, 'server', 'index.html'))
+      ? path.join(distDir, 'server', 'index.html')
+      : path.join(distDir, 'index.html');
+    const templateHtml = fs.readFileSync(templatePath, 'utf-8');
     const serverEntryPath = fs.existsSync(path.join(distDir, 'server', 'entry-server.mjs'))
       ? path.join(distDir, 'server', 'entry-server.mjs')
       : path.join(distDir, 'server', 'entry-server.js');
@@ -998,9 +1006,9 @@ async function startServer() {
         const appHtml = render(req.originalUrl, initialAuth);
 
         const html = templateHtml
-          .replace(/<!--ssr-meta-start-->[\s\S]*?<!--ssr-meta-end-->/, ssrMeta)
+          .replace(/<!--ssr-meta-start-->[\s\S]*?<!--ssr-meta-end-->/, () => ssrMeta)
           .replace('<!--ssr-head-->', '')
-          .replace('<!--ssr-outlet-->', appHtml);
+          .replace('<!--ssr-outlet-->', () => appHtml);
 
         const statusCode = adminDeniedStatus ?? (isKnownRoute ? 200 : 404);
         res
@@ -1013,9 +1021,30 @@ async function startServer() {
     });
   }
 
-  app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Nextrade AI server listening on http://localhost:${PORT}`);
-  });
+  return app;
 }
 
-startServer();
+let cachedAppPromise: Promise<express.Express> | null = null;
+
+export function getApp(): Promise<express.Express> {
+  if (!cachedAppPromise) {
+    cachedAppPromise = createApp().catch((err) => {
+      cachedAppPromise = null;
+      throw err;
+    });
+  }
+  return cachedAppPromise;
+}
+
+if (!isVercel) {
+  getApp()
+    .then((app) => {
+      app.listen(PORT, '0.0.0.0', () => {
+        console.log(`Nextrade AI server listening on http://localhost:${PORT}`);
+      });
+    })
+    .catch((err) => {
+      console.error('Failed to start Nextrade AI server:', err);
+      process.exit(1);
+    });
+}

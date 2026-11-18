@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { DatabaseSync, SQLInputValue } from 'node:sqlite';
 import { fileURLToPath } from 'node:url';
@@ -6,7 +7,10 @@ import postgres from 'postgres';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const PROJECT_ROOT = path.resolve(__dirname, '../..');
+const candidateRoot = path.resolve(__dirname, '../..');
+const PROJECT_ROOT = fs.existsSync(path.join(candidateRoot, 'migrations'))
+  ? candidateRoot
+  : process.cwd();
 
 export type AccountStatus = 'active' | 'disabled' | 'suspended';
 export type UserRole =
@@ -117,6 +121,9 @@ export function isUniqueConstraintError(err: unknown): boolean {
 function getDefaultSqlitePath(): string {
   const configured = (process.env.AUTH_DB_PATH ?? '').trim();
   if (configured) return configured;
+  if (process.env.VERCEL) {
+    return path.join(os.tmpdir(), 'nextrade-data', 'nextrade-auth.sqlite');
+  }
   return path.join(PROJECT_ROOT, '.data', 'nextrade-auth.sqlite');
 }
 
