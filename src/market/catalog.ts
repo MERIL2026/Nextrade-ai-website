@@ -1,0 +1,232 @@
+import type { CatalogIndex, CatalogInstrument } from './types';
+
+export const CATALOG_INDICES: CatalogIndex[] = [
+  {
+    id: 'nifty50',
+    symbol: '^NSEI',
+    name: 'NIFTY 50',
+    exchange: 'NSE',
+    region: 'IN',
+    currency: 'INR',
+  },
+  {
+    id: 'sensex',
+    symbol: '^BSESN',
+    name: 'BSE SENSEX',
+    exchange: 'BSE',
+    region: 'IN',
+    currency: 'INR',
+  },
+  {
+    id: 'banknifty',
+    symbol: '^NSEBANK',
+    name: 'BANK NIFTY',
+    exchange: 'NSE',
+    region: 'IN',
+    currency: 'INR',
+  },
+  {
+    id: 'sp500',
+    symbol: '^GSPC',
+    name: 'S&P 500',
+    exchange: 'NYSE / CME',
+    region: 'US',
+    currency: 'USD',
+  },
+  {
+    id: 'nasdaq',
+    symbol: '^IXIC',
+    name: 'NASDAQ COMPOSITE',
+    exchange: 'NASDAQ',
+    region: 'US',
+    currency: 'USD',
+  },
+  {
+    id: 'dow',
+    symbol: '^DJI',
+    name: 'DOW JONES 30',
+    exchange: 'NYSE',
+    region: 'US',
+    currency: 'USD',
+  },
+];
+
+export const CATALOG_INSTRUMENTS: CatalogInstrument[] = [
+  // Indian Large-Cap Equities (NSE)
+  {
+    symbol: 'RELIANCE.NS',
+    name: 'Reliance Industries Ltd.',
+    exchange: 'NSE',
+    region: 'IN',
+    category: 'STOCK',
+    currency: 'INR',
+    sector: 'Energy & Digital',
+  },
+  {
+    symbol: 'TCS.NS',
+    name: 'Tata Consultancy Services',
+    exchange: 'NSE',
+    region: 'IN',
+    category: 'STOCK',
+    currency: 'INR',
+    sector: 'IT Services',
+  },
+  {
+    symbol: 'HDFCBANK.NS',
+    name: 'HDFC Bank Ltd.',
+    exchange: 'NSE',
+    region: 'IN',
+    category: 'STOCK',
+    currency: 'INR',
+    sector: 'Private Banking',
+  },
+  {
+    symbol: 'INFY.NS',
+    name: 'Infosys Limited',
+    exchange: 'NSE',
+    region: 'IN',
+    category: 'STOCK',
+    currency: 'INR',
+    sector: 'Enterprise Software',
+  },
+  // US Equities (NASDAQ / NYSE)
+  {
+    symbol: 'NVDA',
+    name: 'NVIDIA Corporation',
+    exchange: 'NASDAQ',
+    region: 'US',
+    category: 'STOCK',
+    currency: 'USD',
+    sector: 'Semiconductors & Compute',
+  },
+  {
+    symbol: 'AAPL',
+    name: 'Apple Inc.',
+    exchange: 'NASDAQ',
+    region: 'US',
+    category: 'STOCK',
+    currency: 'USD',
+    sector: 'Consumer Hardware',
+  },
+  {
+    symbol: 'MSFT',
+    name: 'Microsoft Corporation',
+    exchange: 'NASDAQ',
+    region: 'US',
+    category: 'STOCK',
+    currency: 'USD',
+    sector: 'Enterprise Cloud',
+  },
+  {
+    symbol: 'GOOGL',
+    name: 'Alphabet Inc.',
+    exchange: 'NASDAQ',
+    region: 'US',
+    category: 'STOCK',
+    currency: 'USD',
+    sector: 'Digital Platforms & Research',
+  },
+  // Exchange-Traded Funds (ETFs)
+  {
+    symbol: 'NIFTYBEES.NS',
+    name: 'Nippon India ETF Nifty 50 BeES',
+    exchange: 'NSE',
+    region: 'IN',
+    category: 'ETF',
+    currency: 'INR',
+    sector: 'Index ETF (India)',
+  },
+  {
+    symbol: 'SPY',
+    name: 'SPDR S&P 500 ETF Trust',
+    exchange: 'NYSE Arca',
+    region: 'US',
+    category: 'ETF',
+    currency: 'USD',
+    sector: 'Large-Cap Equity ETF',
+  },
+  {
+    symbol: 'QQQ',
+    name: 'Invesco QQQ Trust Series 1',
+    exchange: 'NASDAQ',
+    region: 'US',
+    category: 'ETF',
+    currency: 'USD',
+    sector: 'NASDAQ-100 ETF',
+  },
+  // Crypto Benchmarks
+  {
+    symbol: 'BTC-USD',
+    name: 'Bitcoin / USD',
+    exchange: 'CRYPTO',
+    region: 'GLOBAL',
+    category: 'CRYPTO',
+    currency: 'USD',
+    sector: 'Digital Assets',
+    coingeckoId: 'bitcoin',
+  },
+  {
+    symbol: 'ETH-USD',
+    name: 'Ethereum / USD',
+    exchange: 'CRYPTO',
+    region: 'GLOBAL',
+    category: 'CRYPTO',
+    currency: 'USD',
+    sector: 'Digital Assets',
+    coingeckoId: 'ethereum',
+  },
+  {
+    symbol: 'SOL-USD',
+    name: 'Solana / USD',
+    exchange: 'CRYPTO',
+    region: 'GLOBAL',
+    category: 'CRYPTO',
+    currency: 'USD',
+    sector: 'Digital Assets',
+    coingeckoId: 'solana',
+  },
+  // Foreign Exchange Reference Pairs
+  {
+    symbol: 'USDINR=X',
+    name: 'USD / INR Spot Reference',
+    exchange: 'FX',
+    region: 'GLOBAL',
+    category: 'FOREX',
+    currency: 'INR',
+    sector: 'Cross-Border FX',
+    fxBase: 'USD',
+    fxQuote: 'INR',
+  },
+  {
+    symbol: 'EURUSD=X',
+    name: 'EUR / USD Spot Reference',
+    exchange: 'FX',
+    region: 'GLOBAL',
+    category: 'FOREX',
+    currency: 'USD',
+    sector: 'G10 FX',
+    fxBase: 'EUR',
+    fxQuote: 'USD',
+  },
+  {
+    symbol: 'GBPUSD=X',
+    name: 'GBP / USD Spot Reference',
+    exchange: 'FX',
+    region: 'GLOBAL',
+    category: 'FOREX',
+    currency: 'USD',
+    sector: 'G10 FX',
+    fxBase: 'GBP',
+    fxQuote: 'USD',
+  },
+];
+
+export function findCatalogInstrument(symbol: string): CatalogInstrument | undefined {
+  const clean = symbol.trim().toUpperCase();
+  return CATALOG_INSTRUMENTS.find((i) => i.symbol.toUpperCase() === clean);
+}
+
+export function findCatalogIndex(symbol: string): CatalogIndex | undefined {
+  const clean = symbol.trim().toUpperCase();
+  return CATALOG_INDICES.find((i) => i.symbol.toUpperCase() === clean || i.id.toUpperCase() === clean);
+}

@@ -1,0 +1,1187 @@
+# NEXTRADE AI — PHASE 3
+# COMPLETE ADMIN CONTROL CENTRE
+## Master Implementation Prompt
+
+Act as a principal software architect, senior full-stack engineer, security engineer, DevOps engineer, and premium fintech SaaS product designer.
+
+Your task is to implement a complete, production-oriented **Nextrade AI Admin Control Centre** inside the existing Nextrade AI codebase.
+
+The Admin Control Centre must provide authorized administrators with centralized control, monitoring, configuration, and operational management of the entire Nextrade AI platform.
+
+This is an existing project. Extend it. Do not rebuild it.
+
+The goal is to build a professional fintech operations dashboard comparable in quality and usability to Stripe Dashboard, Linear, Vercel Dashboard, and enterprise financial technology platforms.
+
+---
+
+# 1. MANDATORY PROJECT INSPECTION
+
+Before implementing anything, inspect the complete existing codebase and verify the actual completion of Phase 1 and Phase 2.
+
+Inspect:
+
+AUTHENTICATION
+- src/auth/db.ts
+- src/auth/crypto.ts
+- src/auth/service.ts
+- Existing authentication middleware.
+- Existing session management.
+- Existing email verification and password reset.
+- Existing AuthProvider.
+
+AUTHORIZATION
+- Existing role definitions.
+- Existing permission model.
+- Existing RBAC middleware.
+- Existing authorization tests.
+- Existing administrative security controls.
+
+DATABASE
+- Current active database.
+- Authentication schema.
+- User schema.
+- Workspace tables.
+- Portfolio tables.
+- Watchlist tables.
+- Paper-trading tables.
+- Research history.
+- Audit-event tables.
+- Database migration system.
+
+BACKEND
+- server.ts
+- Existing API routes.
+- Middleware.
+- Security utilities.
+- Rate limiters.
+- Error handling.
+- Monitoring integrations.
+
+FRONTEND
+- src/App.tsx
+- src/components/WorkspaceApp.tsx
+- Existing navigation.
+- Existing UI components.
+- Existing design tokens.
+- Existing responsive layouts.
+
+SECURITY
+- Previous Cloudflare Security Audit report.
+- Existing remediation changes.
+- Existing security regression tests.
+
+IMPORTANT:
+Do not assume Phase 2 is complete merely because its implementation was requested. Verify the actual code, database migrations, and tests.
+
+If any Phase 2 dependency is missing, document it and implement only what can be safely built on the verified foundation.
+
+Do not silently bypass authorization or create an insecure alternative.
+
+---
+
+# 2. ADMIN ROUTE AND APPLICATION STRUCTURE
+
+Create the dedicated administration interface at:
+
+`/admin`
+
+Suggested nested routes:
+
+/admin
+/admin/users
+/admin/users/:id
+/admin/ai
+/admin/markets
+/admin/apis
+/admin/security
+/admin/infrastructure
+/admin/jobs
+/admin/configuration
+/admin/audit-logs
+/admin/announcements
+/admin/support
+/admin/access-control
+/admin/settings
+
+The entire `/admin` route hierarchy must be protected by server-side authorization.
+
+Unauthenticated users must be redirected to login.
+
+Authenticated ordinary users must be denied access.
+
+Frontend route guards are only a user-experience feature. Every protected backend operation must independently enforce permissions.
+
+Do not expose admin information through public APIs.
+
+---
+
+# 3. ADMIN DESIGN SYSTEM
+
+Create a premium, modern, professional fintech administration interface.
+
+DESIGN REFERENCES:
+- Stripe Dashboard
+- Linear
+- Vercel
+- Apple
+- Bloomberg-style data clarity
+
+VISUAL DIRECTION:
+
+Sidebar:
+- Dark graphite background.
+- Monochrome Nextrade AI branding.
+- Clear section labels.
+- Minimal line icons.
+- Collapsible navigation.
+- Active navigation indicator.
+
+Main workspace:
+- Clean light background.
+- White surfaces.
+- Subtle borders.
+- Royal Cobalt accents.
+- Premium typography.
+- Tabular numerals for financial metrics.
+- Compact but readable data tables.
+- Carefully controlled spacing.
+- Minimal shadows.
+- Subtle glass overlays only where appropriate.
+
+Color direction:
+- Primary background: #F7F8FA
+- Surface: #FFFFFF
+- Primary text: #080B12
+- Secondary text: #667085
+- Accent: #2D46E6
+- Dark sidebar: #101827
+
+Maintain the existing monochrome Nextrade AI logo.
+
+Avoid:
+- Generic AI-generated dashboard aesthetics.
+- Excessive gradients.
+- Neon colors.
+- Unnecessary 3D elements.
+- Oversized metric cards.
+- Decorative fake charts.
+- Unnecessary animations.
+
+The result must feel like a carefully designed professional financial operations product.
+
+---
+
+# 4. GLOBAL ADMIN LAYOUT
+
+Build a persistent admin layout.
+
+SIDEBAR NAVIGATION:
+
+OVERVIEW
+- Command Centre
+
+MANAGEMENT
+- User Management
+- AI Control Centre
+- Market Data
+- API & Integrations
+
+OPERATIONS
+- Infrastructure
+- Background Jobs
+- System Configuration
+
+SECURITY
+- Security Centre
+- Audit Logs
+- Access Control
+
+COMMUNICATION
+- Announcements
+- Support & Feedback
+
+PERSONAL
+- Admin Profile
+- Admin Settings
+
+GLOBAL HEADER:
+- Breadcrumbs.
+- Page title.
+- Global search.
+- Notifications.
+- System status indicator.
+- Admin profile menu.
+- Account and logout actions.
+
+RESPONSIVE BEHAVIOR:
+- Desktop sidebar.
+- Collapsible tablet sidebar.
+- Mobile navigation drawer.
+- Responsive data tables.
+- Mobile-friendly filters.
+- Accessible forms and dialogs.
+
+Implement keyboard accessibility and proper focus management.
+
+---
+
+# 5. COMMAND CENTRE
+
+Build the central operational overview.
+
+Display actual platform metrics where available:
+
+USER METRICS
+- Total registered users.
+- Active users.
+- New registrations.
+- Verified accounts.
+- Suspended accounts.
+
+AI METRICS
+- Total research requests.
+- AI provider availability.
+- Request latency.
+- Request failures.
+- Token usage, if measurable.
+- Estimated AI cost, if measurable.
+
+MARKET DATA METRICS
+- Active providers.
+- Provider availability.
+- Last successful synchronization.
+- Data freshness.
+- Failed synchronization jobs.
+
+API METRICS
+- Request volume.
+- Error rates.
+- Rate-limit events.
+- Endpoint availability.
+
+INFRASTRUCTURE
+- Backend health.
+- Database connectivity.
+- Background jobs.
+- Deployment version.
+- Uptime, if measured.
+
+SECURITY
+- Open incidents.
+- Failed login attempts.
+- Blocked requests.
+- Recent privileged actions.
+
+VISUALIZATIONS:
+- User growth chart.
+- API traffic chart.
+- AI usage chart.
+- Error trend chart.
+- Service health table.
+- Recent activity feed.
+
+Every visualization must use real backend data.
+
+Never fabricate operational metrics.
+
+If a metric cannot be measured, display "Not configured" or "Data unavailable".
+
+Provide date-range filtering where appropriate.
+
+---
+
+# 6. USER MANAGEMENT
+
+Build a comprehensive user administration module.
+
+USER DIRECTORY:
+- User ID.
+- Name.
+- Email.
+- Account status.
+- Email verification status.
+- Role.
+- Registration date.
+- Last login.
+- Last activity, if available.
+
+FEATURES:
+- Search users.
+- Filter by role.
+- Filter by account status.
+- Filter by verification status.
+- Sort and paginate.
+- View individual user profiles.
+- View account activity.
+- View user sessions.
+- Revoke sessions.
+- Suspend accounts.
+- Restore accounts.
+- Change authorized roles.
+- Delete accounts with strict safeguards.
+- Export appropriately authorized records.
+
+USER DETAIL PAGE:
+
+Display:
+- Account overview.
+- Profile information.
+- Account status.
+- Verification state.
+- Assigned permissions.
+- Active sessions.
+- Registration and activity history.
+- Associated workspace metadata.
+- Security events.
+
+ACCOUNT ACTIONS:
+
+Every sensitive operation must:
+- Check the administrator's permissions.
+- Require confirmation.
+- Require re-authentication when appropriate.
+- Generate an audit event.
+- Return a truthful success or failure result.
+
+Do not allow an administrator to silently modify another administrator's privileges without appropriate authority.
+
+Never expose password hashes, authentication tokens, or private credentials.
+
+---
+
+# 7. AI CONTROL CENTRE
+
+Create a centralized AI operations dashboard.
+
+PROVIDER MANAGEMENT:
+- Configured AI provider.
+- Current model.
+- Provider connectivity.
+- Provider configuration status.
+- Available fallback models.
+
+USAGE ANALYTICS:
+- Total requests.
+- Requests per day.
+- Request latency.
+- Failed requests.
+- Token consumption, if available.
+- Estimated cost, if available.
+- Usage by feature.
+- Usage limits.
+
+MODEL MANAGEMENT:
+- Configure supported model.
+- Change approved model settings.
+- Configure fallback behavior.
+- Enable or disable AI features.
+- Configure safe usage limits.
+
+PROMPT MANAGEMENT:
+- View approved prompt templates.
+- Manage prompt versions.
+- Compare versions.
+- Activate approved versions.
+- Roll back to an earlier version.
+
+RESEARCH MONITORING:
+- Research request history.
+- Request status.
+- Failure information.
+- Latency.
+- Model metadata.
+
+SECURITY:
+- Never expose API keys.
+- Never return secret environment variables.
+- Never log complete private credentials.
+- Keep provider configuration server-side.
+- Validate all configuration changes.
+- Log every privileged change.
+
+Preserve the existing Gemini integration and its fallback behavior.
+
+Do not silently change production AI behavior.
+
+---
+
+# 8. MARKET DATA MANAGEMENT
+
+Create a central market-data operations module.
+
+PROVIDER MANAGEMENT:
+- Provider name.
+- Connection status.
+- Supported exchanges.
+- API health.
+- Last successful response.
+- Provider latency.
+- Rate-limit/quota status, if available.
+
+MARKET COVERAGE:
+- India markets.
+- US markets.
+- Supported exchanges.
+- Supported instruments.
+- Symbol availability.
+
+DATA QUALITY:
+- Data freshness.
+- Missing data.
+- Delayed feeds.
+- Failed requests.
+- Synchronization errors.
+
+PROVIDER CONTROLS:
+- Enable or disable supported provider integrations.
+- Configure provider priority.
+- Configure fallback provider, if implemented.
+- Manage approved symbol mappings.
+- Trigger authorized synchronization jobs.
+
+Display clear data classifications:
+
+- LIVE
+- DELAYED
+- SIMULATED
+- UNAVAILABLE
+
+Never misrepresent simulated or delayed data as live market data.
+
+Never modify historical market records without strict authorization and immutable audit logging.
+
+---
+
+# 9. API & INTEGRATION MANAGEMENT
+
+Build a complete API operations dashboard.
+
+FEATURES:
+- API endpoint directory.
+- Endpoint availability.
+- Request volume.
+- Response latency.
+- HTTP status breakdown.
+- Error rates.
+- Rate-limit activity.
+- Integration health.
+- Webhook monitoring, if implemented.
+- Failed request inspection.
+- Time-range filters.
+
+Provide safe request diagnostics.
+
+Never expose:
+- API keys.
+- Authentication tokens.
+- Passwords.
+- Sensitive headers.
+- Private financial information.
+
+Allow authorized administrators to manage supported rate-limit settings.
+
+Do not weaken security limits without explicit privileged authorization and audit logging.
+
+---
+
+# 10. SECURITY CENTRE
+
+Build a centralized security monitoring interface.
+
+Integrate the actual Cloudflare Security Audit artifacts where available:
+
+- REPORT.md
+- findings.json
+- coverage-ledger.json
+- architecture.md
+
+Historical audit results previously reported:
+- 0 Critical findings.
+- 0 High findings.
+- 3 Medium findings fixed.
+- 3 Low findings fixed.
+
+Display historical audit results with their audit date and report provenance.
+
+Do not automatically treat old audit results as the current live security status.
+
+FEATURES:
+
+AUTHENTICATION MONITORING
+- Login successes.
+- Failed login attempts.
+- Blocked logins.
+- Verification events.
+- Password reset events.
+
+SESSION SECURITY
+- Active sessions.
+- Revoked sessions.
+- Suspicious session activity.
+- Session revocation.
+
+API SECURITY
+- Rate-limit events.
+- Blocked requests.
+- Invalid payload events.
+- Suspicious request patterns.
+
+SECURITY AUDIT
+- Audit history.
+- Finding severity.
+- Finding status.
+- Remediation history.
+- Reverification results.
+
+CONFIGURATION SECURITY
+- Security headers.
+- CSP status, where measurable.
+- Cookie configuration.
+- Environment configuration checks.
+- Dependency vulnerability reports.
+
+INCIDENT MANAGEMENT
+- Incident creation.
+- Severity.
+- Status.
+- Description.
+- Assigned administrator.
+- Resolution notes.
+- Event history.
+
+Never claim that the application is completely secure.
+
+---
+
+# 11. INFRASTRUCTURE MONITORING
+
+Create a platform infrastructure module.
+
+MONITOR:
+- Backend health.
+- Frontend availability.
+- Database health.
+- AI provider health.
+- Market-data provider health.
+- Background task execution.
+- Application errors.
+- Deployment version.
+
+WHERE ACTUAL MONITORING EXISTS:
+- CPU usage.
+- Memory usage.
+- Disk usage.
+- Network metrics.
+- Database connection statistics.
+
+Do not invent metrics.
+
+FEATURES:
+- Service health cards.
+- Service dependency overview.
+- Uptime history.
+- Error logs.
+- Incident timeline.
+- Deployment history.
+- Health-check history.
+
+Clearly distinguish unavailable monitoring from a healthy service.
+
+---
+
+# 12. BACKGROUND JOB MANAGEMENT
+
+Build a central job monitoring interface.
+
+DISPLAY:
+- Job name.
+- Job type.
+- Status.
+- Last execution.
+- Next execution, if available.
+- Execution duration.
+- Failure reason.
+- Retry count.
+
+FEATURES:
+- View jobs.
+- Filter jobs.
+- Inspect failed jobs.
+- View execution history.
+- Retry authorized failed jobs.
+- Cancel supported jobs.
+
+Do not create fake background jobs.
+
+Only display jobs registered in the actual backend.
+
+Job retries must be safe and idempotent where required.
+
+---
+
+# 13. SYSTEM CONFIGURATION
+
+Create a centralized platform configuration module.
+
+FEATURES:
+- Feature flags.
+- Maintenance mode.
+- Supported market settings.
+- AI feature configuration.
+- Supported integration configuration.
+- API rate limits.
+- Default workspace preferences.
+- Announcement settings.
+- Application-level configuration.
+
+CONFIGURATION SAFETY:
+- Validate all values server-side.
+- Do not expose secret environment variables.
+- Separate public and private configuration.
+- Record previous and new values.
+- Require confirmation for critical changes.
+- Log all configuration modifications.
+- Support rollback where practical.
+
+Maintenance mode must not prevent authorized recovery operations.
+
+Do not provide unrestricted arbitrary environment-variable editing through the UI.
+
+---
+
+# 14. AUDIT LOGS
+
+Build a complete administrative audit logging interface.
+
+Record:
+
+- Administrator ID.
+- Action.
+- Resource type.
+- Resource ID.
+- Timestamp.
+- Previous value, where appropriate.
+- New value, where appropriate.
+- Request metadata.
+- Result.
+- Correlation ID.
+
+FEATURES:
+- Search.
+- Filters.
+- Date ranges.
+- Administrator filters.
+- Action categories.
+- Resource filters.
+- Pagination.
+- Export.
+
+Audit logs must be append-only through normal application operations.
+
+Normal administrators must not be able to edit or silently erase historical audit records.
+
+Sensitive values must be redacted.
+
+Do not store raw passwords, session tokens, API keys, or reset tokens in audit logs.
+
+---
+
+# 15. ACCESS CONTROL MANAGEMENT
+
+Build the administrator role and permission management interface.
+
+INITIAL ROLES:
+
+SUPER_ADMIN
+- Complete administrative control.
+- Manage administrator permissions.
+- Critical platform configuration.
+- Emergency operations.
+
+SECURITY_ADMIN
+- Security Centre.
+- Security monitoring.
+- Session management.
+- Security incidents.
+- Audit-log inspection.
+
+AI_ADMIN
+- AI provider settings.
+- Model configuration.
+- Prompt management.
+- AI usage monitoring.
+
+DATA_ADMIN
+- Market-data providers.
+- Exchange configuration.
+- Symbol management.
+- Synchronization jobs.
+
+SUPPORT_ADMIN
+- User support.
+- Contact submissions.
+- Announcements.
+
+VIEWER
+- Read-only administrative access.
+
+Implement granular permissions.
+
+Allow role assignment only to administrators with explicit permission to manage roles.
+
+Prevent:
+- Self-escalation.
+- Privilege escalation.
+- Unauthorized Super Admin creation.
+- Removal of the last active Super Admin.
+- Unauthorized permission modification.
+
+All role changes must be audited.
+
+The initial Super Admin must be provisioned securely using a controlled server-side bootstrap mechanism, never a public default account.
+
+---
+
+# 16. ANNOUNCEMENTS & SUPPORT
+
+ANNOUNCEMENTS:
+- Create.
+- Edit.
+- Preview.
+- Publish.
+- Unpublish.
+- Schedule, if supported.
+- Maintenance notices.
+- Platform updates.
+
+SUPPORT:
+- Contact submissions.
+- User feedback.
+- Support request directory.
+- Search.
+- Filters.
+- Status changes.
+- Resolution notes.
+
+Validate and sanitize submitted content.
+
+Prevent stored XSS.
+
+Do not expose private support information to unauthorized administrators.
+
+---
+
+# 17. ADMIN PROFILE AND SETTINGS
+
+Provide an admin-specific profile and security area.
+
+FEATURES:
+- Administrator profile.
+- Account details.
+- Role information.
+- Active sessions.
+- Session revocation.
+- Password-change integration.
+- MFA status.
+- Notification preferences.
+- Recent administrative activity.
+- Logout.
+
+Require appropriate re-authentication for critical security changes.
+
+---
+
+# 18. EMERGENCY OPERATIONS
+
+Implement carefully restricted emergency controls.
+
+SUPPORTED OPERATIONS, ONLY WHERE THE BACKEND CAN SAFELY IMPLEMENT THEM:
+
+- Enable maintenance mode.
+- Disable selected AI features.
+- Disable selected integrations.
+- Revoke administrator sessions.
+- Restrict selected API functionality.
+- View active incidents.
+- Trigger approved recovery workflows.
+
+Every emergency action must:
+
+1. Require a privileged permission.
+2. Require explicit confirmation.
+3. Require re-authentication where appropriate.
+4. Be validated server-side.
+5. Produce an immutable audit event.
+6. Return the actual operation result.
+
+Do not implement destructive operations without strict safeguards.
+
+---
+
+# 19. BACKEND API ARCHITECTURE
+
+Build modular admin APIs following the existing Express architecture.
+
+Suggested endpoints:
+
+OVERVIEW
+GET /api/admin/overview
+
+USERS
+GET /api/admin/users
+GET /api/admin/users/:id
+PATCH /api/admin/users/:id
+POST /api/admin/users/:id/suspend
+POST /api/admin/users/:id/restore
+GET /api/admin/users/:id/sessions
+
+AI
+GET /api/admin/ai/overview
+GET /api/admin/ai/usage
+GET /api/admin/ai/requests
+PATCH /api/admin/ai/config
+GET /api/admin/ai/prompts
+
+MARKET DATA
+GET /api/admin/markets/providers
+GET /api/admin/markets/health
+GET /api/admin/markets/symbols
+POST /api/admin/markets/sync
+
+APIS
+GET /api/admin/apis/overview
+GET /api/admin/apis/traffic
+GET /api/admin/apis/errors
+
+SECURITY
+GET /api/admin/security/overview
+GET /api/admin/security/events
+GET /api/admin/security/audits
+GET /api/admin/security/incidents
+
+INFRASTRUCTURE
+GET /api/admin/infrastructure/health
+GET /api/admin/infrastructure/services
+
+JOBS
+GET /api/admin/jobs
+GET /api/admin/jobs/:id
+POST /api/admin/jobs/:id/retry
+
+CONFIGURATION
+GET /api/admin/config
+PATCH /api/admin/config
+
+AUDIT LOGS
+GET /api/admin/audit-logs
+
+ACCESS CONTROL
+GET /api/admin/roles
+GET /api/admin/permissions
+PATCH /api/admin/users/:id/role
+
+ANNOUNCEMENTS
+GET /api/admin/announcements
+POST /api/admin/announcements
+PATCH /api/admin/announcements/:id
+DELETE /api/admin/announcements/:id
+
+Adapt endpoint names and functionality to the real codebase.
+
+Do not create duplicate endpoints for existing functionality.
+
+All endpoints must enforce:
+- Authentication.
+- Role authorization.
+- Permission checks.
+- Input validation.
+- Rate limiting.
+- Safe error handling.
+- Audit logging for sensitive mutations.
+
+Never expose internal secrets or private user data unnecessarily.
+
+---
+
+# 20. ADMIN DATABASE ARCHITECTURE
+
+Inspect the actual Phase 2 schema before adding tables.
+
+Add only required entities.
+
+Potential entities:
+
+ADMIN_INCIDENTS
+- id
+- title
+- description
+- severity
+- status
+- assigned_admin_id
+- created_at
+- updated_at
+- resolved_at
+
+ADMIN_ANNOUNCEMENTS
+- id
+- title
+- content
+- status
+- created_by
+- published_at
+- created_at
+- updated_at
+
+ADMIN_CONFIG_AUDIT
+- id
+- admin_id
+- config_key
+- previous_value_redacted
+- new_value_redacted
+- created_at
+
+ADMIN_ROLE_ASSIGNMENTS
+- id
+- user_id
+- assigned_role
+- assigned_by
+- created_at
+
+Use existing audit-event and role structures wherever possible.
+
+Do not duplicate existing tables.
+
+Implement appropriate:
+- Foreign keys.
+- Indexes.
+- Constraints.
+- Transactions.
+- Migrations.
+- Rollback scripts.
+
+Support both the active database dialect and the existing PostgreSQL migration strategy.
+
+---
+
+# 21. SECURITY REQUIREMENTS
+
+Security is a core part of this implementation.
+
+MANDATORY:
+
+- Server-side RBAC.
+- Centralized permission enforcement.
+- Protected admin API routes.
+- Strict resource ownership rules.
+- CSRF protection where applicable.
+- Secure session validation.
+- Re-authentication for sensitive actions.
+- Rate limiting.
+- Input validation.
+- SQL parameterization.
+- Safe error handling.
+- Sensitive-data redaction.
+- Immutable administrative audit events.
+- Secure admin bootstrap.
+- Protection against IDOR.
+- Protection against mass assignment.
+- Protection against privilege escalation.
+
+Do not:
+- Trust frontend role values.
+- Trust localStorage for authorization.
+- Expose API keys.
+- Expose password hashes.
+- Create hidden admin bypasses.
+- Hardcode admin credentials.
+- Weaken existing Cloudflare security protections.
+
+Use the existing Cloudflare security audit fixes as the baseline.
+
+---
+
+# 22. TESTING
+
+Create and execute a comprehensive admin security test suite.
+
+AUTHORIZATION:
+- Anonymous user cannot access `/admin`.
+- Normal user cannot access admin APIs.
+- Viewer cannot modify platform configuration.
+- AI Admin cannot modify security roles.
+- Data Admin cannot manage unrelated permissions.
+- Super Admin permissions work as intended.
+
+PRIVILEGE ESCALATION:
+- Normal users cannot change their role.
+- Administrators cannot self-escalate.
+- Unauthorized role changes are rejected.
+- Last Super Admin cannot be accidentally removed.
+
+ADMIN API SECURITY:
+- Unauthorized API requests rejected.
+- Invalid payloads rejected.
+- CSRF checks enforced.
+- Rate limits enforced.
+- Secrets never returned.
+
+USER MANAGEMENT:
+- Unauthorized user suspension rejected.
+- Authorized suspension works.
+- Session revocation works.
+- Account deletion safeguards work.
+
+AUDIT LOGS:
+- Sensitive operations generate audit events.
+- Unauthorized audit access rejected.
+- Audit events cannot be silently modified.
+- Sensitive values are redacted.
+
+CONFIGURATION:
+- Invalid settings rejected.
+- Unauthorized configuration updates rejected.
+- Changes produce audit events.
+- Rollback works where implemented.
+
+FRONTEND:
+- Protected routes work.
+- Unauthorized pages are inaccessible.
+- Sidebar permissions are displayed correctly.
+- Desktop and mobile layouts work.
+
+Run:
+- Existing authentication tests.
+- Existing Phase 2 tests.
+- Existing security regression tests.
+- New admin tests.
+- TypeScript checks.
+- Production build.
+- API integration tests.
+- Browser tests.
+- Responsive tests.
+
+Do not claim a test passed unless it was actually executed.
+
+---
+
+# 23. PERFORMANCE AND USABILITY
+
+The admin centre must remain responsive with growing platform data.
+
+Implement:
+- Server-side pagination.
+- Search and filtering.
+- Indexed queries.
+- Lazy loading for large tables.
+- Efficient aggregations.
+- Appropriate caching for non-sensitive read-only metrics.
+- Safe invalidation after configuration changes.
+- Loading skeletons.
+- Empty states.
+- Error states.
+- Accessible confirmations.
+
+Do not fetch the entire user database or audit history in one request.
+
+---
+
+# 24. IMPLEMENTATION ROADMAP
+
+Implement the Admin Control Centre incrementally.
+
+STAGE A — Admin Architecture
+- Inspect Phase 1 and Phase 2.
+- Verify RBAC.
+- Verify Super Admin bootstrap.
+- Define permissions.
+- Protect `/admin`.
+- Create admin layout.
+
+STAGE B — Command Centre
+- Overview APIs.
+- Platform health.
+- User metrics.
+- AI metrics.
+- Market-data metrics.
+- Activity feed.
+
+STAGE C — Management
+- User management.
+- AI control centre.
+- Market-data management.
+- API integrations.
+
+STAGE D — Operations
+- Infrastructure monitoring.
+- Background jobs.
+- System configuration.
+- Announcements.
+- Support.
+
+STAGE E — Security
+- Security Centre.
+- Audit logs.
+- Access control.
+- Incident management.
+- Emergency operations.
+
+STAGE F — Verification
+- Admin security tests.
+- RBAC tests.
+- API authorization tests.
+- Responsive QA.
+- Performance checks.
+- Production build.
+- Security audit.
+
+Complete each stage and verify it before continuing.
+
+Do not implement every module as a non-functional placeholder merely to claim completion.
+
+---
+
+# 25. FINAL DELIVERY REPORT
+
+At completion, provide:
+
+1. Existing architecture findings.
+2. Phase 1 and Phase 2 verification results.
+3. Admin route architecture.
+4. UI modules implemented.
+5. Admin role and permission matrix.
+6. Backend endpoints created.
+7. Database changes and migrations.
+8. Security controls.
+9. Admin bootstrap instructions.
+10. Monitoring integrations.
+11. Test results with real pass/fail counts.
+12. Build and TypeScript results.
+13. Responsive browser test results.
+14. Known limitations.
+15. Production deployment instructions.
+16. Remaining production-readiness tasks.
+
+For every module, explicitly distinguish:
+
+- Fully implemented.
+- Partially implemented.
+- Not configured.
+- Not implemented.
+
+Never claim a module is operational when it is only a visual mockup.
+
+---
+
+# FINAL OBJECTIVE
+
+Build the Nextrade AI Admin Control Centre as a secure, professional, comprehensive financial technology operations platform.
+
+It must allow authorized administrators to manage users, monitor AI services, control market-data integrations, inspect APIs, monitor infrastructure, manage configuration, investigate security events, review audit logs, and operate the platform safely.
+
+Use the existing authentication and authorization architecture.
+
+Preserve all existing Nextrade AI functionality.
+
+Implement incrementally, enforce permissions on the backend, test every privileged operation, and never compromise existing security controls.
+
+The result must be a real integrated administration system, not a dashboard prototype.
