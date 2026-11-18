@@ -934,9 +934,11 @@ export async function createApp(): Promise<express.Express> {
       }
     });
   } else {
-    const distDir = fs.existsSync(path.join(__dirname, 'dist'))
-      ? path.join(__dirname, 'dist')
-      : path.join(process.cwd(), 'dist');
+    const distDir = fs.existsSync(path.join(__dirname, 'index.html'))
+      ? path.resolve(__dirname, '..')
+      : fs.existsSync(path.join(__dirname, 'dist'))
+        ? path.join(__dirname, 'dist')
+        : path.join(process.cwd(), 'dist');
     const templatePath = fs.existsSync(path.join(distDir, 'server', 'index.html'))
       ? path.join(distDir, 'server', 'index.html')
       : path.join(distDir, 'index.html');
