@@ -97,10 +97,7 @@ export function resolvePostgresConnectionUrl(): string {
   if (!raw || DB_URL_PLACEHOLDERS.has(raw)) return '';
   if (raw.includes('[PROJECT-REF]') || raw.includes('[PASSWORD]')) return '';
   if (!/^postgres(ql)?:\/\//i.test(raw)) return '';
-  // Supabase PgBouncer Transaction Pooler (port 6543) has severe connection limits
-  // that cause 60s checkout timeouts in serverless environments. Port 5432 (Session Pooler)
-  // connects cleanly in milliseconds. Automatically rewrite if port 6543 is configured.
-  return raw.replace(/(\.pooler\.supabase\.com):6543\b/i, '$1:5432');
+  return raw;
 }
 
 export function toIsoTimestamp(value: string | Date | null | undefined): string | null {
@@ -122,11 +119,11 @@ export function isUniqueConstraintError(err: unknown): boolean {
 }
 
 function getDefaultSqlitePath(): string {
-  const configured = (process.env.AUTH_DB_PATH ?? '').trim();
-  if (configured) return configured;
   if (process.env.VERCEL) {
     return path.join(os.tmpdir(), 'nextrade-data', 'nextrade-auth.sqlite');
   }
+  const configured = (process.env.AUTH_DB_PATH ?? '').trim();
+  if (configured) return configured;
   return path.join(PROJECT_ROOT, '.data', 'nextrade-auth.sqlite');
 }
 
@@ -257,12 +254,12 @@ async function createPostgresAuthDatabase(connectionUrl: string): Promise<AuthDa
     connectionUrl.includes('127.0.0.1');
 
   const sql = postgres(connectionUrl, {
-    prepare: false, // Compatible with Supabase PgBouncer
+    prepare: false, // Required for Supabase PgBouncer Transaction Pooler (port 6543)
     max_pipeline: 1, // Avoid pipelining deadlock
     ssl: isLocalHost ? false : 'require',
-    max: 2, // Keep connection count minimal for serverless functions
-    idle_timeout: 10,
-    connect_timeout: 5, // Fast 5s timeout to prevent serverless function hangs
+    max: process.env.VERCEL ? 1 : 5, // Single connection per serverless function to prevent pool exhaustion
+    idle_timeout: 5,
+    connect_timeout: 4, // Fast 4s timeout to prevent serverless function hangs
   });
 
   const migrationsDir = path.join(PROJECT_ROOT, 'migrations', 'postgres');
@@ -279,6 +276,9 @@ async function createPostgresAuthDatabase(connectionUrl: string): Promise<AuthDa
       for (const row of rows) {
         const v = (row as { version?: string }).version;
         if (v) applied.add(v);
+      }
+      if (ORDERED_MIGRATIONS.every((v) => applied.has(v))) {
+        return;
       }
     }
 
