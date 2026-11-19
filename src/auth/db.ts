@@ -97,7 +97,10 @@ export function resolvePostgresConnectionUrl(): string {
   if (!raw || DB_URL_PLACEHOLDERS.has(raw)) return '';
   if (raw.includes('[PROJECT-REF]') || raw.includes('[PASSWORD]')) return '';
   if (!/^postgres(ql)?:\/\//i.test(raw)) return '';
-  return raw;
+  // Supabase PgBouncer Transaction Pooler (port 6543) has severe connection limits
+  // that cause 60s checkout timeouts in serverless environments. Port 5432 (Session Pooler)
+  // connects cleanly in milliseconds. Automatically rewrite if port 6543 is configured.
+  return raw.replace(/(\.pooler\.supabase\.com):6543\b/i, '$1:5432');
 }
 
 export function toIsoTimestamp(value: string | Date | null | undefined): string | null {
@@ -254,12 +257,12 @@ async function createPostgresAuthDatabase(connectionUrl: string): Promise<AuthDa
     connectionUrl.includes('127.0.0.1');
 
   const sql = postgres(connectionUrl, {
-    prepare: false, // Compatible with Supabase PgBouncer Transaction Pooler (port 6543)
-    max_pipeline: 1, // Avoid pipelining deadlock over PgBouncer transaction pooling
+    prepare: false, // Compatible with Supabase PgBouncer
+    max_pipeline: 1, // Avoid pipelining deadlock
     ssl: isLocalHost ? false : 'require',
-    max: 10,
-    idle_timeout: 20,
-    connect_timeout: 15,
+    max: 2, // Keep connection count minimal for serverless functions
+    idle_timeout: 10,
+    connect_timeout: 5, // Fast 5s timeout to prevent serverless function hangs
   });
 
   const migrationsDir = path.join(PROJECT_ROOT, 'migrations', 'postgres');
@@ -332,8 +335,23 @@ export async function createAuthDatabase(customDbPath?: string): Promise<AuthDat
   const pgUrl = customDbPath ? '' : resolvePostgresConnectionUrl();
   if (pgUrl) {
     try {
-      const database = await createPostgresAuthDatabase(pgUrl);
-      await database.runMigrations();
+      const startupPromise = (async () => {
+        const database = await createPostgresAuthDatabase(pgUrl);
+        await database.runMigrations();
+        return database;
+      })();
+
+      // Prevent serverless functions from exceeding Vercel maxDuration
+      let timeoutHandle: ReturnType<typeof setTimeout> | undefined;
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        timeoutHandle = setTimeout(
+          () => reject(new Error('PostgreSQL startup check timed out after 5000ms')),
+          5000,
+        );
+      });
+
+      const database = await Promise.race([startupPromise, timeoutPromise]);
+      if (timeoutHandle) clearTimeout(timeoutHandle);
       return database;
     } catch (err) {
       console.warn(
