@@ -1,6 +1,7 @@
 import type {
   LegacyImportSummary,
   UserPreferencesPayload,
+  WorkspaceOverviewPayload,
   WorkspacePaperAccount,
   WorkspacePaperOrder,
   WorkspacePaperTransaction,
@@ -58,6 +59,7 @@ async function wsRequest<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 export const workspaceApi = {
+  getOverview: () => wsRequest<WorkspaceOverviewPayload & { ok: true }>('/overview'),
   getProfile: () => wsRequest<WorkspaceProfilePayload & { ok: true }>('/profile'),
 
   // Portfolios

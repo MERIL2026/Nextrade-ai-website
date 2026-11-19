@@ -22,6 +22,7 @@ import type {
   UserPreferencesPayload,
   WorkspaceDefaultTab,
   WorkspaceHolding,
+  WorkspaceOverviewPayload,
   WorkspacePaperAccount,
   WorkspacePaperOrder,
   WorkspacePaperTransaction,
@@ -497,7 +498,7 @@ export function createWorkspaceService(options: WorkspaceServiceOptions) {
   }
 
   async function acquireUserLock(tx: AuthQueryRunner, userId: string): Promise<void> {
-    if (tx.dialect === 'postgres') {
+    if (tx.dialect === 'postgres' && !process.env.VERCEL) {
       await tx.execute('', 'SELECT pg_advisory_xact_lock(hashtext($1))', [userId]);
     }
   }
@@ -2499,8 +2500,47 @@ export function createWorkspaceService(options: WorkspaceServiceOptions) {
     });
   }
 
+  async function getWorkspaceOverview(user: PublicAuthUser): Promise<WorkspaceOverviewPayload> {
+    await ensureUserWorkspace(user.id);
+    const [
+      profile,
+      portfolios,
+      watchlists,
+      paperData,
+      ordersData,
+      txData,
+      researchData,
+      savedReports,
+      preferences,
+    ] = await Promise.all([
+      getProfile(user),
+      listPortfolios(user.id),
+      listWatchlists(user.id),
+      getPaperAccount(user.id),
+      listPaperOrders(user.id, { limit: 50 }),
+      listPaperTransactions(user.id, { limit: 50 }),
+      listResearchHistory(user.id, { limit: 50 }),
+      listSavedReports(user.id),
+      getPreferences(user.id),
+    ]);
+
+    return {
+      profile,
+      portfolios,
+      watchlists,
+      paperAccount: paperData.account,
+      paperPortfolio: paperData.portfolio,
+      orders: ordersData.orders,
+      transactions: txData.transactions,
+      researchHistory: researchData.items,
+      savedReports,
+      preferences,
+    };
+  }
+
   return {
     ensureUserWorkspace,
+    getWorkspaceOverview,
     getProfile,
     listPortfolios,
     getPortfolio,

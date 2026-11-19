@@ -173,3 +173,16 @@ export interface LegacyImportSummary {
   importedOrdersCount: number;
   importedRegion: 'ALL' | MarketRegion | null;
 }
+
+export interface WorkspaceOverviewPayload {
+  profile: WorkspaceProfilePayload;
+  portfolios: WorkspacePortfolio[];
+  watchlists: WorkspaceWatchlist[];
+  paperAccount: WorkspacePaperAccount;
+  paperPortfolio: WorkspacePortfolio;
+  orders: WorkspacePaperOrder[];
+  transactions: WorkspacePaperTransaction[];
+  researchHistory: WorkspaceResearchItem[];
+  savedReports: WorkspaceSavedReport[];
+  preferences: UserPreferencesPayload;
+}

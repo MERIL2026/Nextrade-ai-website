@@ -62,6 +62,33 @@ export function createWorkspaceRouter(options: WorkspaceRouterOptions) {
     next();
   });
 
+  // ---- Unified Workspace Overview (Instant 1-Shot Bootstrap) ----
+  router.get(
+    '/overview',
+    requirePermission(PERMISSIONS.WORKSPACE_READ),
+    async (req: RbacAuthenticatedRequest, res, next) => {
+      try {
+        const overview = await workspaceService.getWorkspaceOverview(req.auth!.user);
+        res.json({ ok: true, ...overview });
+      } catch (err) {
+        next(err);
+      }
+    },
+  );
+
+  router.get(
+    '/',
+    requirePermission(PERMISSIONS.WORKSPACE_READ),
+    async (req: RbacAuthenticatedRequest, res, next) => {
+      try {
+        const overview = await workspaceService.getWorkspaceOverview(req.auth!.user);
+        res.json({ ok: true, ...overview });
+      } catch (err) {
+        next(err);
+      }
+    },
+  );
+
   router.get(
     '/profile',
     requirePermission(PERMISSIONS.WORKSPACE_READ),

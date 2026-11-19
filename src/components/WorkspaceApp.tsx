@@ -458,27 +458,79 @@ export const WorkspaceApp: React.FC<WorkspaceAppProps> = ({
     setWsLoading(true);
     setWsError(null);
     try {
-      const [
-        profRes,
-        portList,
-        wlList,
-        paperAccRes,
-        ordersRes,
-        txRes,
-        researchRes,
-        reportsList,
-        prefsRes,
-      ] = await Promise.all([
-        workspaceApi.getProfile(),
-        workspaceApi.listPortfolios(),
-        workspaceApi.listWatchlists(),
-        workspaceApi.getPaperAccount(),
-        workspaceApi.listPaperOrders({ limit: 50 }),
-        workspaceApi.listPaperTransactions({ limit: 50 }),
-        workspaceApi.listResearchHistory({ limit: 50 }),
-        workspaceApi.listSavedReports(),
-        workspaceApi.getPreferences(),
-      ]);
+      let profRes: WorkspaceProfilePayload;
+      let portList: WorkspacePortfolio[];
+      let wlList: WorkspaceWatchlist[];
+      let paperAccountObj: WorkspacePaperAccount;
+      let ordersList: WorkspacePaperOrder[];
+      let txList: WorkspacePaperTransaction[];
+      let researchList: WorkspaceResearchItem[];
+      let reportsList: WorkspaceSavedReport[];
+      let prefsRes: UserPreferencesPayload;
+
+      try {
+        const ov = await workspaceApi.getOverview();
+        profRes = ov.profile;
+        portList = ov.portfolios;
+        wlList = ov.watchlists;
+        paperAccountObj = ov.paperAccount;
+        ordersList = ov.orders;
+        txList = ov.transactions;
+        researchList = ov.researchHistory;
+        reportsList = ov.savedReports;
+        prefsRes = ov.preferences;
+      } catch (ovErr) {
+        console.warn('Unified workspace overview failed, falling back to multi-fetch:', ovErr);
+        const [pProfile, pPorts, pWatch, pPaper, pOrders, pTx, pResearch, pReports, pPrefs] =
+          await Promise.allSettled([
+            workspaceApi.getProfile(),
+            workspaceApi.listPortfolios(),
+            workspaceApi.listWatchlists(),
+            workspaceApi.getPaperAccount(),
+            workspaceApi.listPaperOrders({ limit: 50 }),
+            workspaceApi.listPaperTransactions({ limit: 50 }),
+            workspaceApi.listResearchHistory({ limit: 50 }),
+            workspaceApi.listSavedReports(),
+            workspaceApi.getPreferences(),
+          ]);
+
+        if (pProfile.status !== 'fulfilled') {
+          throw pProfile.reason;
+        }
+
+        profRes = pProfile.value;
+        portList = pPorts.status === 'fulfilled' ? pPorts.value : [];
+        wlList = pWatch.status === 'fulfilled' ? pWatch.value : [];
+        paperAccountObj =
+          pPaper.status === 'fulfilled'
+            ? pPaper.value.account
+            : {
+                id: '',
+                userId: profRes.user.id,
+                portfolioId: profRes.defaultPortfolioId,
+                startingBalanceUsd: 100000,
+                cashBalanceUsd: 100000,
+                realizedPnlUsd: 0,
+                currency: 'USD',
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+              };
+        ordersList = pOrders.status === 'fulfilled' ? pOrders.value.orders : [];
+        txList = pTx.status === 'fulfilled' ? pTx.value.transactions : [];
+        researchList = pResearch.status === 'fulfilled' ? pResearch.value.items : [];
+        reportsList = pReports.status === 'fulfilled' ? pReports.value : [];
+        prefsRes =
+          pPrefs.status === 'fulfilled'
+            ? pPrefs.value
+            : {
+                defaultRegion: 'ALL',
+                defaultCurrency: 'USD',
+                defaultTab: 'home',
+                defaultTimeframe: '1M',
+                compactTables: false,
+                researchAutoSave: true,
+              };
+      }
 
       setProfile(profRes);
       setPortfolios(portList);
@@ -493,10 +545,10 @@ export const WorkspaceApp: React.FC<WorkspaceAppProps> = ({
           ? prev
           : profRes.defaultWatchlistId || wlList[0]?.id || '',
       );
-      setPaperAccount(paperAccRes.account);
-      setPaperOrders(ordersRes.orders);
-      setPaperTransactions(txRes.transactions);
-      setResearchHistory(researchRes.items);
+      setPaperAccount(paperAccountObj);
+      setPaperOrders(ordersList);
+      setPaperTransactions(txList);
+      setResearchHistory(researchList);
       setSavedReports(reportsList);
       setPreferences(prefsRes);
 
