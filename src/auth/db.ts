@@ -330,10 +330,20 @@ async function createPostgresAuthDatabase(connectionUrl: string): Promise<AuthDa
 
 export async function createAuthDatabase(customDbPath?: string): Promise<AuthDatabase> {
   const pgUrl = customDbPath ? '' : resolvePostgresConnectionUrl();
-  const database = pgUrl
-    ? await createPostgresAuthDatabase(pgUrl)
-    : createSqliteAuthDatabase(customDbPath);
+  if (pgUrl) {
+    try {
+      const database = await createPostgresAuthDatabase(pgUrl);
+      await database.runMigrations();
+      return database;
+    } catch (err) {
+      console.warn(
+        '[Nextrade DB] PostgreSQL connection/migration failed, falling back to SQLite:',
+        err instanceof Error ? err.message : String(err),
+      );
+    }
+  }
 
+  const database = createSqliteAuthDatabase(customDbPath);
   await database.runMigrations();
   return database;
 }
